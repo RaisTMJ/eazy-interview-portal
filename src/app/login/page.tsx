@@ -1,9 +1,48 @@
-// src/app/login/page.jsx (or pages/login.jsx depending on your router)
+"use client";
 
-import { Sign } from "crypto"
-import { type } from "os"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import api from "@/lib/api";
+import { useDispatch } from "react-redux";
+// import { setCredentials } from "@/store/authSlice";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+type LoginFormInputs = z.infer<typeof loginSchema>;
+
 
 export default function LoginPageUI() {
+// const dispatch = useDispatch();
+const router = useRouter();
+const {register, handleSubmit, formState: { errors, isSubmitting}, setError, } = useForm<LoginFormInputs>({
+  resolver: zodResolver(loginSchema),
+})
+
+const onSubmit = async (data: LoginFormInputs) => {
+  try {
+    const response = await api.post("/auth/login", data);
+    const { token, user } = response.data;
+    // dispatch(setCredentials({ token, user }));
+    Cookies.set("token", token);
+    router.push("/dashboard");
+  } catch (error: any) {
+    if (error.response && error.response.data && error.response.data.message) {
+      setError("email", { type: "manual", message: error.response.data.message });
+    } else {
+      setError("email", { type: "manual", message: "An unexpected error occurred" });
+    }
+
+  }
+
+
+}
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -12,7 +51,7 @@ export default function LoginPageUI() {
             Sign in to your account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" action="#" method="POST">
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email-address" className="sr-only">
