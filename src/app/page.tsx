@@ -1,6 +1,14 @@
 import Image from "next/image";
 
 export default function Home() {
+   return (
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <h1 className="text-4xl font-extrabold text-blue-600 p-6 border-4 border-red-500 rounded-xl shadow-2xl transition duration-500 ease-in-out transform hover:scale-105">
+        Tailwind is Working! 🚀
+      </h1>
+    </div>
+  );
+  
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
