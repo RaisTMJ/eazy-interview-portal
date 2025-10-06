@@ -1,65 +1,41 @@
 import { type Config } from "tailwindcss";
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 const config = {
   darkMode: "class",
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
+ content: [
+    './*.html', // Adjust this to match your project structure
+    './src/**/*.{js,jsx,ts,tsx}',
+  ],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
+      // Define the color palette from the UI designs
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+        'brand-background': '#F8F9FA', // Light grey background
+        'brand-surface': '#FFFFFF', // Card background
+        'brand-text': '#111827',     // Dark text for headings
+        'brand-subtext': '#6B7280', // Lighter text for links/subtitles
+        'brand-primary': {
+          DEFAULT: '#3B82F6', // Blue for links and focus rings
+          light: '#60A5FA',
         },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+        'brand-accent': {
+          start: '#3B82F6', // Gradient start (blue)
+          end: '#8B5CF6',   // Gradient end (purple)
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
+        'brand-orange': {
+          start: '#F97316', // Gradient start (orange)
+          end: '#EA580C',   // Gradient end (darker orange)
+        }
       },
-      borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
-      },
-      boxShadow: {
-        card: "0 20px 45px -20px rgba(15, 23, 42, 0.35)",
-        input: "0 2px 6px -2px rgba(15, 23, 42, 0.08)",
-      },
+      // Use a clean, modern sans-serif font like Inter
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "SFMono-Regular", "monospace"],
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
+      // Add a custom soft box-shadow
+      boxShadow: {
+        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+      }
     },
   },
   plugins: [],
