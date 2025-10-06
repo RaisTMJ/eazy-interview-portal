@@ -3,112 +3,149 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import api from "@/lib/api";
-import { useDispatch } from "react-redux";
-// import { setCredentials } from "@/store/authSlice";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-
+import Link from "next/link";
+import { loginUser } from "@/lib/authService";
+import { Input } from "@/components/ui/Input";
+import { useState } from "react";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
-type LoginFormInputs = z.infer<typeof loginSchema>;
-
+export type LoginFormInputs = z.infer<typeof loginSchema>;
 
 export default function LoginPageUI() {
-// const dispatch = useDispatch();
-const router = useRouter();
-const {register, handleSubmit, formState: { errors, isSubmitting}, setError, } = useForm<LoginFormInputs>({
-  resolver: zodResolver(loginSchema),
-})
+  const [serverError, setServerError] = useState("");
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+  } = useForm<LoginFormInputs>({
+    resolver: zodResolver(loginSchema),
+  });
 
-const onSubmit = async (data: LoginFormInputs) => {
-  try {
-    const response = await api.post("/auth/login", data);
-    const { token, user } = response.data;
-    // dispatch(setCredentials({ token, user }));
-    Cookies.set("token", token);
-    router.push("/dashboard");
-  } catch (error: any) {
-    if (error.response && error.response.data && error.response.data.message) {
-      setError("email", { type: "manual", message: error.response.data.message });
-    } else {
-      setError("email", { type: "manual", message: "An unexpected error occurred" });
+  const onSubmit = async (data: LoginFormInputs) => {
+    setServerError("");
+    try {
+      console.log("Submitting login form with data:", data);
+      await loginUser(data);
+      router.push("/profile");
+    } catch (error: unknown) {
+      setServerError("Invalid email or password. Please try again.");
+      if (error instanceof Error && error.message) {
+        setError("email", { type: "manual", message: error.message });
+      } else {
+        setError("email", {
+          type: "manual",
+          message: "An unexpected error occurred",
+        });
+      }
     }
-
-  }
-
-
-}
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+    // Use a subtle gradient for the background
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-100 p-4">
+      <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-2xl shadow-xl">
+        {/* Header Section */}
+        <div className="text-center">
+          <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
             Sign in to your account
           </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Welcome back! Please enter your details.
+          </p>
         </div>
+
+        {/* Form Section */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          {/* Using a div to group inputs with a larger gap */}
+          <div className="space-y-4">
+            {/* Email Input Field */}
             <div>
-              <label htmlFor="email-address" className="sr-only">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Email address
               </label>
-              <input
-                id="email-address"
-                name="email"
+              <Input
+                {...register("email")}
                 type="email"
-                autoComplete="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                id="email"
+                placeholder="name@example.com"
               />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
+
+            {/* Password Input Field */}
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
+              <Input
+                {...register("password")}
                 type="password"
-                autoComplete="current-password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                id="password"
+                placeholder="••••••••"
               />
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
             </div>
           </div>
 
+          {/* Remember Me & Register Link */}
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+              <label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-900"
+              >
                 Remember me
               </label>
             </div>
-
             <div className="text-sm">
-              <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link
+                href="/register"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
                 Register Account
-              </a>
+              </Link>
             </div>
           </div>
 
+          {/* Server Error Message */}
+          {serverError && (
+            <p className="text-red-500 text-sm text-center">{serverError}</p>
+          )}
+
+          {/* Submit Button */}
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              disabled={isSubmitting}
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-4 text-sm font-semibold text-white shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {isSubmitting ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
